@@ -20,13 +20,14 @@ function Login() {
     function onSubmit(event){
         event.preventDefault();
         doLogin(email, password)
-        .then(isValid => {
-            if(isValid){
+        .then(response => {
+            if(response){
+                localStorage.setItem('token', response.token); 
                 history.push('/settings');
             }
         })
         .catch(err =>{
-            setError(err)
+            setError('user or password invalid !')
         });
 
     }
@@ -50,7 +51,7 @@ function Login() {
                             </div>
                             <div className="text-center text-text-md-center mb-4 mt-md-0">
                                 <h1 className="mb-0 h3">
-                                    Sing  in to our platform
+                                    Register in to our platform
                                 </h1>
                             </div>
                             <form action="" className="mt-4" onSubmit={onSubmit}>
