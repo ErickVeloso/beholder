@@ -1,20 +1,26 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const settingsRepository = require('../repositories/settingsRepository');
 
-function doLogin(req, res, next) {
+async function doLogin(req, res, next) {
     const email = req.body.email;
     const password = req.body.password;
 
-    console.log(email, password)
-
-    if (email === "teste@123.com"
-        && bcrypt.compareSync(password, "$2a$12$wcvl5qhuiWXJLpOcYHa1MOLETd5fCOoo5bN5FtSgJXq/oFhZVeqIK")) {
-            const token = jwt.sign({id: 1}, process.env.JWT_SECRET, {
+    const settings = await settingsRepository.getSettingsByEmail(email);
+    if (settings) {
+        const isValid = bcrypt.compareSync(password, settings.password);
+        if (isValid) {
+            const token = jwt.sign({
+                id: settings.id
+            },
+                process.env.JWT_SECRET, {
                 expiresIn: parseInt(process.env.JWT_EXPIRES)
             })
-        res.json({token});
+            return res.json({ token });
+        }
     }
-    else res.sendStatus(401);
+
+    res.status(401).send('401 Unauthorized');
 }
 
 const blackList = [];
